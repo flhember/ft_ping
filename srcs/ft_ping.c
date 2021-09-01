@@ -1,0 +1,67 @@
+#include "ft_ping.h"
+
+/*void		ft_stop()
+{
+	ft_printf("\nSTOOOOOOP\n");
+	exit(EXIT_SUCCESS);
+}
+
+int		main(int ac, char **av)
+{
+	struct	timeval	current_time;
+	int		socket_d;
+	struct addrinfo	hints, *res, *p;
+	char		test[20];
+	(void)ac;
+
+	signal(SIGINT, ft_stop);
+
+	gettimeofday(&current_time, NULL);
+
+	socket_d = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+
+	ft_memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	getaddrinfo(av[1], NULL, &hints, &res);
+	p = res;
+	while (p != NULL)
+	{
+		if (p->ai_family == AF_INET)
+		{
+			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+			inet_ntop(AF_INET, &(ipv4->sin_addr), test, 20);
+			ft_printf("ip test %s\n", test);
+			p = p->ai_next;
+		}
+	}
+
+	inet_ntop(AF_INET, av[1], test, 20);
+	ft_printf("ip test inet %s\n", test);
+	
+	ft_printf("\t--TEST--\n");
+	ft_printf("  socket des = %d,\n", socket_d); // -1 si pas sudo
+	ft_printf("  getpid = %d,\n", getpid());
+	ft_printf("  getuid = %d,\n", getuid());
+	ft_printf("  seconds = %ld,\n  microseconde = %ld\n,", current_time.tv_sec, current_time.tv_usec);
+	ft_printf("\t--------\n");
+
+	ft_printf("\n%s\n", av[1]);
+	while (1);
+
+	return (0);
+}*/
+
+void		ft_send_ping(char *ipt)
+{
+	printf("PING %s\n", ipt);
+}
+
+int		main(int ac, char **av)
+{
+	if (ac == 2)
+	{
+		ft_send_ping(av[1]);	
+	}	
+	return (0);
+}
