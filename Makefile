@@ -54,26 +54,26 @@ $(OBJ_PATH):
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@$(CC) $(CFLAGS) -c -I $(INC_PATH) -I $(LIB) $< -o $@
-	@echo "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
+	@echo -e "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
 
 $(LIB):
-	@make -C $(LIB_PATH)
+	@make -sC $(LIB_PATH)
 
 $(NAME): $(INC) $(LIB) $(OBJ_PATH) $(OBJ)
 	@$(CC) $(CFLAGS) $(OBJ) $(LIB) -o $(NAME) -I $(INC_PATH)
-	@echo "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
+	@echo -e "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
 
 clean:
 	@$(RM) -R $(OBJ_PATH)
-	@make clean -C $(LIB_PATH)
-	@echo "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
+	@make clean -sC $(LIB_PATH)
+	@echo -e "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
 
 fclean: clean
 	@$(RM) -R $(NAME)
-	@make fclean -C $(LIB_PATH)
-	@echo "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
+	@make fclean -sC $(LIB_PATH)
+	@echo -e "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
 
 re: fclean
-	@make all
+	@make all -s
 
 .PHONY: clean, fclean, all, re, lib

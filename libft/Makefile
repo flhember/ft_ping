@@ -67,19 +67,19 @@ $(OBJ_PATH):
 
 $(OBJ_FILES): $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 	@$(CC) $(CFLAGS) -c -I $(INC_PATH) $< -o $@
-	@echo "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
+	@echo -e "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
 
 $(NAME): $(INC_FILES) $(OBJ_PATH) $(OBJ_FILES)
 	@ar rcs $(NAME) $(OBJ_FILES)
-	@echo "$(grn_li)$(notdir $(NAME))$(grn_da) done.$(end)"
+	@echo -e "$(grn_li)$(notdir $(NAME))$(grn_da) done.$(end)"
 
 clean:
-	@$(RM) -R $(OBJ_PATH) $(DEPS)
-	@echo "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
+	@$(RM) -R $(OBJ_PATH) $(DEPS) 
+	@echo -e "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
 
 fclean: clean
 	@$(RM) -R $(NAME)
-	@echo "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
+	@echo -e "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
 
 re: fclean
 	@make all
