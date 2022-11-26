@@ -51,42 +51,11 @@ int	set_sockopt(int sockfd)
 	return (0);
 }
 
-struct timeval	ft_gettime(void)
+int	rec_ping(int sockfd, struct sockaddr_in *ping_addr)
 {
-	struct timeval	tv;
-
-	gettimeofday(&tv, NULL);
-	return (tv);
-}
-
-int	send_ping(int sockfd, struct sockaddr_in *ping_addr)
-{
-	unsigned int 	i	= 0;
-	struct ping_pkt pckt;
-	struct timeval	time_start;
-	//struct timeval	time_end;
-
-	ft_bzero(&pckt, sizeof(pckt));
-	pckt.hdr.type = ICMP_ECHO;
-	pckt.hdr.code = 0;
-	pckt.hdr.un.echo.id = getpid();
-	while (i < sizeof(pckt.msg) - 1)
-	{
-		pckt.msg[i] = i;
-		i++;
-	}
-	pckt.msg[i] = 0;
-	pckt.hdr.un.echo.sequence = 1;
-	pckt.hdr.checksum = checksum(&pckt, sizeof(pckt));
-	time_start = ft_gettime();
-
-	printf("time of day %ld.%ld\n",time_start.tv_sec, time_start.tv_usec);
-	if (sendto(sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)
-		printf("Packet sending failded!\n");
-
 	struct msghdr	msg;
 	struct iovec	iov[1];
-	char		msg_buffer[4096];
+	char		msg_buffer[PING_PKT_S];
 	struct cmsghdr	ct_buf;
 
 	memset(&msg_buffer, 0, sizeof(msg_buffer));
@@ -103,10 +72,53 @@ int	send_ping(int sockfd, struct sockaddr_in *ping_addr)
 	msg.msg_controllen = sizeof(ct_buf);
 
 	printf("ret recvmsg %zd\n", recvmsg(sockfd, &msg, 0));
-	//printf("cmsg level %d\n", cmhdr->cmsg_level);
-	//printf("IPPROTO_IP %d\n", IPPROTO_IP);
-	//printf("cmsg type %d\n", cmhdr->cmsg_type);
-	//printf("IP_TTL %d\n", IP_TTL);
+
+	struct icmphdr *icmp = (void *)msg_buffer + sizeof(struct iphdr);
+
+	if (icmp->type == 0)
+		return (0);
+	return (1);
+	//printf("type %d \n", icmp->type);
+	//printf("type reply %d \n", ICMP_ECHOREPLY);
+
+
+}
+
+int	send_ping(int sockfd, struct sockaddr_in *ping_addr)
+{
+	unsigned int 	i	= 0;
+	struct ping_pkt pckt;
+	struct timeval	time_start;
+	struct timeval	time_end;
+	long double	total_time = 0;
+
+	ft_bzero(&pckt, sizeof(pckt));
+	pckt.hdr.type = ICMP_ECHO;
+	pckt.hdr.code = 0;
+	pckt.hdr.un.echo.id = getpid();
+	while (i < sizeof(pckt.msg) - 1)
+	{
+		pckt.msg[i] = i;
+		i++;
+	}
+	pckt.msg[i] = 0;
+	pckt.hdr.un.echo.sequence = 1;
+	pckt.hdr.checksum = checksum(&pckt, sizeof(pckt));
+	gettimeofday(&time_start, NULL);
+
+	printf("time of day %ld.%ld\n",time_start.tv_sec, time_start.tv_usec);
+	if (sendto(sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0) {
+		printf("Packet sending failded!\n");
+		return (1);
+	}
+	if (rec_ping(sockfd, ping_addr) > 0) {
+		printf("Packet not receive\n");
+		return (1);
+	}
+	gettimeofday(&time_end, NULL);
+	total_time += (time_end.tv_sec - time_start.tv_sec) * 1000.0 +
+		(time_end.tv_usec - time_start.tv_usec) / 1000.0;
+	printf("time total ping %.2Lf ms.\n", total_time);
 
 	return (0);
 }
