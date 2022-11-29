@@ -20,7 +20,7 @@ end=$ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-PING_FILES	= ft_ping
+PING_FILES	= main
 INC_FILES	= ft_ping.h
 LIB_BIN		= libft.a
 
