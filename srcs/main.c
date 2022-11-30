@@ -1,11 +1,27 @@
 #include "../includes/ft_ping.h"
 
-int	find_host(char **av, int i, int ac)
+int	find_host(char **av, int i, t_ping *ping)
 {
-	printf("host is %s\n", av[i]);
-	if (i + 1 != ac)
-		printf("Too much option, ac == %d, i == %d\n", ac, i );\
-	//check if host is alredy set
+	struct addrinfo		*addr = NULL;
+	struct addrinfo		hint = {.ai_family = AF_INET, .ai_socktype = SOCK_RAW, .ai_protocol = IPPROTO_ICMP};
+	//char			test[INET_ADDRSTRLEN];
+
+	if (ping->raw_host != NULL) {
+                dprintf(2, "ping: Host alerady set\n");
+		return (-1);
+	}
+	ping->raw_host = av[i];
+	int ret = 11;
+	if ((ret = getaddrinfo(av[i], NULL, &hint, &addr)) != 0) {
+                dprintf(2, "ping: %s: Name or service not known\n", av[1]);
+                return (-1);
+        }
+	printf("ret = %d\n", ret );
+        ping->internet_addr = *(struct sockaddr_in*)addr->ai_addr;
+	//inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, test, sizeof(test));
+	//printf("test %s\n", test);
+	//printf("host is %s\n", inet_ntoa(ping->internet_addr.sin_addr));
+	freeaddrinfo(addr);
 	return (0);
 }
 
@@ -37,11 +53,11 @@ int	parsing(int ac, char **av, t_ping *ping)
 
 	while (i < ac) {
 		if (av[i][0] == '-') {
-			if (!find_opt(av, i, ping))
-				return (1);
+			if (find_opt(av, i, ping) < 0)
+				return (-1);
 		} else {
-			if (!find_host(av, i, ac))
-				return (1);
+			if (find_host(av, i, ping) < 0)
+				return (-1);
 		}
 		i++;
 	}
@@ -62,8 +78,14 @@ int     main(int ac, char **av)
                 dprintf(2, "ping: usage error: Destination address required\n");
                 return (1);
         }
-	if (!parsing(ac, av, &ping)) {
+	if (parsing(ac, av, &ping) < 0) {
+                dprintf(2, "ping: usage error: ------\n");
                 return (1);
+	}
+	if (init_pck(&ping) < 0)
+	{
+                dprintf(2, "ping: ----------\n");
+		return (1);
 	}
 	printf("opt v = %d\nopt h = %d\n", ping.opt_v, ping.opt_h);
         return (0);
