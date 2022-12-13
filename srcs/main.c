@@ -69,6 +69,7 @@ int     main(int ac, char **av)
 	t_ping	ping;
 
 	ft_memset((void *)&ping, 0, sizeof(ping));
+	ping.seq = 1;
 	if (getuid() != 0)
 	{
 		dprintf(2, "Ping: need admin rights\n");

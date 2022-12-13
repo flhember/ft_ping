@@ -18,14 +18,21 @@
 #define TTL_VAL 64
 #define PING_PKT_S 64
 
-typedef struct	s_ping {
+typedef struct		s_ping_pkt {
+	struct			icmphdr hdr;
+        char			msg[PING_PKT_S - sizeof(struct icmphdr)];
+}			t_ping_pkt;
+
+
+typedef struct		s_ping {
 	unsigned int		opt_h;
 	unsigned int		opt_v;
 	int			sockfd;
 	char			*raw_host;
 	struct	sockaddr_in	internet_addr;
-}				t_ping;
+	unsigned int		seq;
+}			t_ping;
 
-int	init_pck(t_ping *ping);
-
+int		init_pck(t_ping *ping);
+uint16_t 	checksum(void *b, size_t len);
 #endif

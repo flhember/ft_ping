@@ -34,11 +34,44 @@ int	init_sock(t_ping *ping)
 	return (0);
 }
 
+void	fill_pck(t_ping_pkt *pckt, t_ping *ping)
+{
+	unsigned int msg = 0;
+
+	ft_bzero(pckt, sizeof(pckt));
+	pckt->hdr.type = ICMP_ECHO;
+	pckt->hdr.code = 0;
+	pckt->hdr.un.echo.id = htons(getpid());
+	pckt->hdr.un.echo.sequence = htons(ping->seq);
+	while (msg < sizeof(pckt->msg))
+	{
+		pckt->msg[msg] = msg;
+		msg++;
+	}
+	gettimeofday((void *)pckt->msg, NULL);
+	printf("%zu size hdr pck\n", sizeof(pckt));
+	pckt->hdr.checksum = checksum(pckt, 64);
+}
+
+int	send_ping(t_ping *ping)
+{
+	t_ping_pkt pckt;
+
+	fill_pck(&pckt, ping);
+	if (sendto(ping->sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&ping->internet_addr,
+							sizeof(ping->internet_addr)) <= 0) {
+		printf("Packet sending fail!\n");
+		return (-1);
+	}
+	return (0);
+}
+
 int	init_pck(t_ping *ping)
 {
-
-	// init sock
 	if ((init_sock(ping)) < 0)
+		return (-1);
+
+	if ((send_ping(ping)) < 0)
 		return (-1);
 	// init pck
 	// 	->header ip
