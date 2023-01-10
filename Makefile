@@ -22,58 +22,44 @@ end=$ \033[0m
 
 PING_FILES	= main ping tool
 INC_FILES	= ft_ping.h
-LIB_BIN		= libft.a
 
 #---------------------------------------PATH/FILES-------------------------------#
 
 SRC_PATH = ./srcs/
 INC_PATH = ./includes/
 OBJ_PATH = ./obj/
-LIB_PATH = ./libft/
 
 SRC_FILES = $(PING_FILES:%=%.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
-LIB_SRC = $(addprefix $(LIB_PATH), $(SRC_PATH))
-OBJ_LIB = $(LIB_SRC:.c=.o)
-LIB_INC = $(addprefix $(LIB_PATH), $(INC_PATH))
-
 INC = $(addprefix $(INC_PATH), $(INC_FILES))
 OBJ = $(patsubst %.c, $(OBJ_PATH)%.o, $(SRC_FILES))
-LIB = $(addprefix $(LIB_PATH), $(LIB_BIN))
 
 #------------------------------------------RULES--------------------------------#
 
 
 all: $(NAME)
 
-lib: $(LIB)
-
 $(OBJ_PATH):
 	@mkdir $(OBJ_PATH)
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@$(CC) $(CFLAGS) -c -I $(INC_PATH) -I $(LIB) $< -o $@
+	@$(CC) $(CFLAGS) -c -I $(INC_PATH) $< -o $@
 	@echo -e "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
 
-$(LIB):
-	@make -sC $(LIB_PATH)
-
-$(NAME): $(INC) $(LIB) $(OBJ_PATH) $(OBJ)
-	@$(CC) $(CFLAGS) $(OBJ) $(LIB) -o $(NAME) -I $(INC_PATH)
+$(NAME): $(INC) $(OBJ_PATH) $(OBJ)
+	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME) -I $(INC_PATH)
 	@echo -e "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
 
 clean:
 	@$(RM) -R $(OBJ_PATH)
-	@make clean -sC $(LIB_PATH)
 	@echo -e "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
 
 fclean: clean
 	@$(RM) -R $(NAME)
-	@make fclean -sC $(LIB_PATH)
 	@echo -e "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
 
 re: fclean
 	@make all -s
 
-.PHONY: clean, fclean, all, re, lib
+.PHONY: clean, fclean, all, re

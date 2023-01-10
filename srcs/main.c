@@ -7,17 +7,16 @@ int	find_host(char **av, int i, t_ping *ping)
 	//char			test[INET_ADDRSTRLEN];
 
 	if (ping->raw_host != NULL) {
-                dprintf(2, "ping: Host alerady set\n");
+        dprintf(2, "ping: Host alerady set\n");
 		return (-1);
 	}
 	ping->raw_host = av[i];
-	int ret = 11;
+	int ret = 0;
 	if ((ret = getaddrinfo(av[i], NULL, &hint, &addr)) != 0) {
-                dprintf(2, "ping: %s: Name or service not known\n", av[1]);
-                return (-1);
-        }
-	printf("ret = %d\n", ret );
-        ping->internet_addr = *(struct sockaddr_in*)addr->ai_addr;
+        dprintf(2, "ping: %s: Name or service not known\n", av[1]);
+        return (-1);
+    }
+    ping->internet_addr = *(struct sockaddr_in*)addr->ai_addr;
 	//inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, test, sizeof(test));
 	//printf("test %s\n", test);
 	//printf("host is %s\n", inet_ntoa(ping->internet_addr.sin_addr));
@@ -42,8 +41,10 @@ int	find_opt(char **av, int i, t_ping *ping)
 			ping->opt_v = TRUE;
 			ping->opt_h = TRUE;
 		}
-	} else
+	} else {
+        dprintf(2, "ping: usage error: usage --------------------------------------- \n");
 		return (-1);
+	}
 	return (0);
 }
 
@@ -68,26 +69,33 @@ int     main(int ac, char **av)
 {
 	t_ping	ping;
 
+	// Set struct info to null and set first seq
 	ft_memset((void *)&ping, 0, sizeof(ping));
 	ping.seq = 1;
+
+	// Check if user is root
 	if (getuid() != 0)
 	{
 		dprintf(2, "Ping: need admin rights\n");
-                return (1);
+        return (1);
 	}
-        if (ac < 2) {
-                dprintf(2, "ping: usage error: Destination address required\n");
-                return (1);
-        }
+	// Check if have adress
+    if (ac < 2) {
+        dprintf(2, "ping: usage error: Destination address required\n");
+        return (1);
+    }
+	// Parse info
 	if (parsing(ac, av, &ping) < 0) {
-                dprintf(2, "ping: usage error: ------\n");
-                return (1);
+        dprintf(2, "ping: usage error: ------\n");
+        return (1);
 	}
+	// if all ok start ping
 	if (init_pck(&ping) < 0)
 	{
-                dprintf(2, "ping: ----------\n");
+        dprintf(2, "ping: ----------\n");
 		return (1);
 	}
-	printf("opt v = %d\nopt h = %d\n", ping.opt_v, ping.opt_h);
-        return (0);
+
+	printf("opt v = %d\nopt h = %d\n", ping.opt_v, ping.opt_h); //debug print
+    return (0);
 }

@@ -18,3 +18,32 @@ uint16_t checksum(void *b, size_t len)
 	result = ~sum;
 	return (result);
 }
+
+void    ft_bzero(void *s, size_t n)
+{
+    char    *cpy;
+    size_t  i;
+
+    i = 0;
+    cpy = s;
+    while (i < n)
+    {
+        cpy[i] = '\0';
+        i++;
+    }
+}
+
+void    *ft_memset(void *s, int c, size_t n)
+{
+    size_t  i;
+    char    *cpy;
+
+    cpy = s;
+    i = 0;
+    while (i < n)
+    {
+        cpy[i] = (unsigned char)c;
+        i++;
+    }
+    return (cpy);
+}
