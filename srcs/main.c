@@ -2,25 +2,30 @@
 
 int	find_host(char **av, int i, t_ping *ping)
 {
+	char				*tmp_addr;
 	struct addrinfo		*addr = NULL;
 	struct addrinfo		hint = {.ai_family = AF_INET, .ai_socktype = SOCK_RAW, .ai_protocol = IPPROTO_ICMP};
-	//char			test[INET_ADDRSTRLEN];
 
-	if (ping->raw_host != NULL) {
+	if (ping->hostname != NULL) {
         dprintf(2, "ping: Host alerady set\n");
 		return (-1);
 	}
-	ping->raw_host = av[i];
-	int ret = 0;
-	if ((ret = getaddrinfo(av[i], NULL, &hint, &addr)) != 0) {
-        dprintf(2, "ping: %s: Name or service not known\n", av[1]);
+	ping->hostname = av[i];
+
+	if (getaddrinfo(ping->hostname, NULL, &hint, &addr) < 0) {
+        dprintf(2, "ping: %s: Name or service not known\n", ping->hostname);
         return (-1);
     }
+
+	if (!(tmp_addr = malloc(INET_ADDRSTRLEN))) {
+		dprintf(2, "ping: Error malloc\n");
+        return (-1);
+	}
     ping->internet_addr = *(struct sockaddr_in*)addr->ai_addr;
-	//inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, test, sizeof(test));
-	//printf("test %s\n", test);
-	//printf("host is %s\n", inet_ntoa(ping->internet_addr.sin_addr));
+	inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, tmp_addr, INET_ADDRSTRLEN);
+	ping->hostname_addr = tmp_addr;
 	freeaddrinfo(addr);
+
 	return (0);
 }
 

@@ -29,17 +29,21 @@ typedef struct			s_ping {
 	unsigned int		opt_h;
 	unsigned int		opt_v;
 	int					sockfd;
-	char				*raw_host;
-	struct				sockaddr_in	internet_addr;
+	char				*hostname;
+	char				*hostname_addr;
 	unsigned int		seq;
+	struct				sockaddr_in	internet_addr;
 }						t_ping;
 
 // ft_ping:
 int			init_pck(t_ping *ping);
 uint16_t 	checksum(void *b, size_t len);
+int			init_sock(t_ping *ping);
+int     	set_sockopt(int sockfd);
 
 // libft:
 void    ft_bzero(void *s, size_t n);
 void    *ft_memset(void *s, int c, size_t n);
+void	*ft_memcpy(void *dest, const void *src, size_t n);
 
 #endif

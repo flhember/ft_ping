@@ -11,16 +11,12 @@ red_li=$ \033[1;31m
 red_da=$ \033[0;31m
 grn_li=$ \033[1;32m
 grn_da=$ \033[0;32m
-yel=$ \033[1;33m
-blu=$ \033[1;34m
-mag=$ \033[1;35m
-cyn=$ \033[1;36m
 whi=$ \033[1;37m
 end=$ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-PING_FILES	= main ping tool
+PING_FILES	= main ping tool socket
 INC_FILES	= ft_ping.h
 
 #---------------------------------------PATH/FILES-------------------------------#
