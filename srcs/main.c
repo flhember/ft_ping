@@ -76,7 +76,6 @@ int     main(int ac, char **av)
 
 	// Set struct info to null and set first seq
 	ft_memset((void *)&ping, 0, sizeof(ping));
-	ping.seq = 1;
 
 	// Check if user is root
 	if (getuid() != 0)

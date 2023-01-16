@@ -14,12 +14,29 @@ void	fill_pck(t_ping_pkt *pckt, t_ping *ping)
 		pckt->msg[msg] = msg;
 		msg++;
 	}
-	gettimeofday((void *)pckt->msg, NULL);
+	if (gettimeofday((void *)pckt->msg, NULL) == -1)
+		dprintf(2, "gettimeofday function error\n");
 	pckt->hdr.checksum = checksum(pckt, 64);
 }
 
-int		check_rec_ping(char *receive_packet)
+suseconds_t		get_rtt_ping(struct timeval *ping_time)
 {
+	struct timeval	curr_time;
+	suseconds_t		time_now;
+	suseconds_t		rtt;
+
+	if (gettimeofday(&curr_time, NULL) == -1) {
+		dprintf(2, "gettimeofday function error\n");
+		return (0);
+	}
+	time_now = curr_time.tv_sec * 1000000 + curr_time.tv_usec;
+	rtt = time_now - ping_time->tv_sec * 1000000 - ping_time->tv_usec;
+	return (rtt);
+}
+
+int		check_rec_ping(char *receive_packet, ssize_t bytes_rec, t_ping *ping)
+{
+	suseconds_t		rtt;
 	struct icmphdr *rec_ping_icmp = (void *)receive_packet + sizeof(struct iphdr);
 
 	//check if packet is for me
@@ -31,6 +48,10 @@ int		check_rec_ping(char *receive_packet)
 	{
 		printf("Error Packet received with ICMP type %d\n", rec_ping_icmp->type);
 		return (-1);
+	} else {
+		rtt = get_rtt_ping((void *)receive_packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
+		printf("%lu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld.%02ld ms\n",
+			bytes_rec - sizeof(struct iphdr), ping->hostname, ping->hostname_addr, ping->seq, TTL_VAL, rtt / 1000l, rtt % 1000l);
 	}
 
 	return (0);
@@ -62,10 +83,9 @@ int 	rec_ping(int sockfd, t_ping *ping)
 	ft_memset(receive_packet, 0, sizeof(receive_packet));
 	ret = recvmsg(sockfd, &msg, 0);
 
-	if (check_rec_ping(receive_packet) < 0) {
+	if (check_rec_ping(receive_packet, ret, ping) < 0) {
 		return (-1);
 	}
-	printf("%lu bytes from %s (%s): icmp_seq=%d ttl=%d time=%d ms\n", ret - sizeof(struct iphdr), ping->hostname, ping->hostname_addr, ping->seq, 0, 0);
 	return (0);
 }
 
@@ -75,7 +95,13 @@ int		ping_loop(t_ping *ping)
 
 	//set packet ping
 	fill_pck(&pckt, ping);
-	
+
+	//incr nb seq
+	ping->seq++;
+
+	//set timer
+
+
 	// send packet
 	if (sendto(ping->sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&ping->internet_addr, sizeof(ping->internet_addr)) <= 0) {
 		dprintf(2, "Packet sending fail!\n");
