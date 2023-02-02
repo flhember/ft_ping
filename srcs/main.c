@@ -90,13 +90,13 @@ int     main(int ac, char **av)
     }
 	// Parse info
 	if (parsing(ac, av, &ping) < 0) {
-        dprintf(2, "ping: usage error: ------\n");
+        dprintf(2, "ping: usage error: parsing \n");
         return (1);
 	}
 	// if all ok start ping
 	if (init_pck(&ping) < 0)
 	{
-        dprintf(2, "ping: ----------\n");
+        dprintf(2, "ping: error init_pck \n");
 		return (1);
 	}
 

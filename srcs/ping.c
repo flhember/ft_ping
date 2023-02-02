@@ -4,7 +4,6 @@ void	fill_pck(t_ping_pkt *pckt, t_ping *ping)
 {
 	unsigned int msg = 0;
 
-	ft_bzero(pckt, sizeof(pckt));
 	pckt->hdr.type = ICMP_ECHO;
 	pckt->hdr.code = 0;
 	pckt->hdr.un.echo.id = htons(getpid());
@@ -65,8 +64,8 @@ int 	rec_ping(int sockfd, t_ping *ping)
 
 	struct iovec io =
 	{                    
-        .iov_base = receive_packet,		/* Adresse de début */
-    	.iov_len = 84					/* Nombre d'octets à transférer */
+        .iov_base = receive_packet,					/* Adresse de début */
+    	.iov_len = 84								/* Nombre d'octets à transférer */
     };
 
     struct msghdr msg =
@@ -89,31 +88,44 @@ int 	rec_ping(int sockfd, t_ping *ping)
 	return (0);
 }
 
-int		ping_loop(t_ping *ping)
+int		send_ping(t_ping *ping)
 {
 	t_ping_pkt pckt;
 
 	//set packet ping
+	ft_bzero(&pckt, sizeof(pckt));
 	fill_pck(&pckt, ping);
-
-	//incr nb seq
 	ping->seq++;
-
-	//set timer
-
-
-	// send packet
 	if (sendto(ping->sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&ping->internet_addr, sizeof(ping->internet_addr)) <= 0) {
 		dprintf(2, "Packet sending fail!\n");
 		return (-1);
 	}
-	
-	//rec packet
-	if (rec_ping(ping->sockfd, ping) < 0) {
-		return (-1);
-	}
-
 	return (0);
+}
+
+int		ping_loop(t_ping *ping)
+{
+	printf("PING %s (%s) %lu(%lu) bytes of data.\n", ping->hostname, ping->hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
+	while (1) {
+		// send packet
+		if (send_ping(ping) < 0) {
+			printf("error send ping\n");
+			return (-1);
+		}
+		//rec packet
+		if (rec_ping(ping->sockfd, ping) < 0) {
+			printf("error rec ping\n");
+			return (-1);
+		}
+	}
+	return (0);
+}
+
+void	stop_ping()
+{
+	printf("\n--- ping statistics ---\n");
+	// print stat!
+	exit(0);
 }
 
 int		init_pck(t_ping *ping)
@@ -121,9 +133,8 @@ int		init_pck(t_ping *ping)
 	// Init socket
 	if ((init_sock(ping)) < 0)
 		return (-1);
-
-	printf("PING %s (%s) %lu(%lu) bytes of data.\n", ping->hostname, ping->hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
-
+	signal(SIGINT, &stop_ping);
+	// Loop send ping
 	if ((ping_loop(ping)) < 0)
 		return (-1);
 	return (0);

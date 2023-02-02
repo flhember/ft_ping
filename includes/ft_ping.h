@@ -32,6 +32,8 @@ typedef struct			s_ping {
 	char				*hostname;
 	char				*hostname_addr;
 	unsigned int		seq;
+	unsigned int		stat_send;
+	unsigned int		stat_rec;
 	struct				sockaddr_in	internet_addr;
 }						t_ping;
 
