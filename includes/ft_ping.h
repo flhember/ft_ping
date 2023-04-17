@@ -10,6 +10,11 @@
 # include <arpa/inet.h>
 # include <signal.h>
 # include <netinet/ip_icmp.h>
+# include <string.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <limits.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -17,6 +22,19 @@
 #define RECV_TIMEOUT 1
 #define TTL_VAL 115
 #define PING_PKT_S 64
+#define	PING_SLEEP 1000000
+
+// Main struct with opt and info 
+extern struct			s_ping {
+	unsigned int		opt_h;
+	unsigned int		opt_v;
+	int					sockfd;
+	char				*hostname;
+	char				*hostname_addr;
+	unsigned int		seq;
+	unsigned int		stat_rec;
+	struct				sockaddr_in	internet_addr;
+}						t_ping;
 
 // Ping packet struct
 typedef struct			s_ping_pkt {
@@ -24,24 +42,11 @@ typedef struct			s_ping_pkt {
     char				msg[PING_PKT_S - sizeof(struct icmphdr)];
 }						t_ping_pkt;
 
-// Main struct with opt and info 
-typedef struct			s_ping {
-	unsigned int		opt_h;
-	unsigned int		opt_v;
-	int					sockfd;
-	char				*hostname;
-	char				*hostname_addr;
-	unsigned int		seq;
-	unsigned int		stat_send;
-	unsigned int		stat_rec;
-	struct				sockaddr_in	internet_addr;
-}						t_ping;
-
 // ft_ping:
-int			init_pck(t_ping *ping);
+int			parsing(int ac, char **av);
+int			init_pck();
+int			init_sock();
 uint16_t 	checksum(void *b, size_t len);
-int			init_sock(t_ping *ping);
-int     	set_sockopt(int sockfd);
 
 // libft:
 void    ft_bzero(void *s, size_t n);

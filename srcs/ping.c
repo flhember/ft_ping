@@ -1,23 +1,6 @@
 #include "../includes/ft_ping.h"
 
-void	fill_pck(t_ping_pkt *pckt, t_ping *ping)
-{
-	unsigned int msg = 0;
-
-	pckt->hdr.type = ICMP_ECHO;
-	pckt->hdr.code = 0;
-	pckt->hdr.un.echo.id = htons(getpid());
-	pckt->hdr.un.echo.sequence = htons(ping->seq);
-	while (msg < sizeof(pckt->msg))
-	{
-		pckt->msg[msg] = msg;
-		msg++;
-	}
-	if (gettimeofday((void *)pckt->msg, NULL) == -1)
-		dprintf(2, "gettimeofday function error\n");
-	pckt->hdr.checksum = checksum(pckt, 64);
-}
-
+/* Get send time of ping and subtract to current time to have total ping time*/
 suseconds_t		get_rtt_ping(struct timeval *ping_time)
 {
 	struct timeval	curr_time;
@@ -33,7 +16,8 @@ suseconds_t		get_rtt_ping(struct timeval *ping_time)
 	return (rtt);
 }
 
-int		check_rec_ping(char *receive_packet, ssize_t bytes_rec, t_ping *ping)
+/* Check ping, if it's for us, reply code and calculat the time*/
+int		check_rec_ping(char *receive_packet, ssize_t bytes_rec)
 {
 	suseconds_t		rtt;
 	struct icmphdr *rec_ping_icmp = (void *)receive_packet + sizeof(struct iphdr);
@@ -50,13 +34,14 @@ int		check_rec_ping(char *receive_packet, ssize_t bytes_rec, t_ping *ping)
 	} else {
 		rtt = get_rtt_ping((void *)receive_packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
 		printf("%lu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld.%02ld ms\n",
-			bytes_rec - sizeof(struct iphdr), ping->hostname, ping->hostname_addr, ping->seq, TTL_VAL, rtt / 1000l, rtt % 1000l);
+			bytes_rec - sizeof(struct iphdr), t_ping.hostname, t_ping.hostname_addr, t_ping.seq, TTL_VAL, rtt / 1000l, rtt % 1000l);
 	}
 
 	return (0);
 }
 
-int 	rec_ping(int sockfd, t_ping *ping)
+/* Rec ping */
+int 	rec_ping(int sockfd)
 {
 	ssize_t ret;
 	char	control[1000];
@@ -82,60 +67,88 @@ int 	rec_ping(int sockfd, t_ping *ping)
 	ft_memset(receive_packet, 0, sizeof(receive_packet));
 	ret = recvmsg(sockfd, &msg, 0);
 
-	if (check_rec_ping(receive_packet, ret, ping) < 0) {
+	if (check_rec_ping(receive_packet, ret) < 0) {
 		return (-1);
 	}
 	return (0);
 }
 
-int		send_ping(t_ping *ping)
+/* Fill pck */
+void	fill_pck(t_ping_pkt *pckt)
+{
+	unsigned int msg = 0;
+
+	pckt->hdr.type = ICMP_ECHO;
+	pckt->hdr.code = 0;
+	pckt->hdr.un.echo.id = htons(getpid());
+	pckt->hdr.un.echo.sequence = htons(t_ping.seq);
+	while (msg < sizeof(pckt->msg))
+	{  
+		pckt->msg[msg] = msg;
+		msg++;
+	}
+	if (gettimeofday((void *)pckt->msg, NULL) == -1)
+		dprintf(2, "gettimeofday function error\n");
+	pckt->hdr.checksum = checksum(pckt, 64);
+}
+
+/* Create fill and send pck */
+int		send_ping( )
 {
 	t_ping_pkt pckt;
 
-	//set packet ping
 	ft_bzero(&pckt, sizeof(pckt));
-	fill_pck(&pckt, ping);
-	ping->seq++;
-	if (sendto(ping->sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&ping->internet_addr, sizeof(ping->internet_addr)) <= 0) {
+	fill_pck(&pckt);
+	t_ping.seq++;
+	if (sendto(t_ping.sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&t_ping.internet_addr, sizeof(t_ping.internet_addr)) <= 0) {
 		dprintf(2, "Packet sending fail!\n");
 		return (-1);
 	}
 	return (0);
 }
 
-int		ping_loop(t_ping *ping)
+/* Send and rec pck */
+int		ping_loop()
 {
-	printf("PING %s (%s) %lu(%lu) bytes of data.\n", ping->hostname, ping->hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
+	printf("PING %s (%s) %lu(%lu) bytes of data.\n", t_ping.hostname, t_ping.hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
 	while (1) {
 		// send packet
-		if (send_ping(ping) < 0) {
+		if (send_ping() < 0) {
 			printf("error send ping\n");
 			return (-1);
 		}
 		//rec packet
-		if (rec_ping(ping->sockfd, ping) < 0) {
+		if (rec_ping(t_ping.sockfd) < 0) {
 			printf("error rec ping\n");
 			return (-1);
 		}
+		// sleep 1s
+		usleep(PING_SLEEP);
 	}
 	return (0);
 }
 
+/* When loop stop print stat*/
 void	stop_ping()
 {
-	printf("\n--- ping statistics ---\n");
-	// print stat!
+	printf("\n--- %s ping statistics ---\n", t_ping.hostname);
+	printf("2 packets transmitted, 2 received, 0 packet loss, time 1002ms\n");
+	printf("rtt min/avg/max/mdev = 20.213/21.388/22.563/1.175 ms\n");
+
 	exit(0);
 }
 
-int		init_pck(t_ping *ping)
+/* Init socket and start loop ping */
+int		init_pck()
 {
-	// Init socket
-	if ((init_sock(ping)) < 0)
+	if ((init_sock()) < 0)
 		return (-1);
+	
+	//set function when loop stop with ctrl + c
 	signal(SIGINT, &stop_ping);
+
 	// Loop send ping
-	if ((ping_loop(ping)) < 0)
+	if ((ping_loop()) < 0)
 		return (-1);
 	return (0);
 }

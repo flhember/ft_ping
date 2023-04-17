@@ -21,7 +21,7 @@ int     set_sockopt(int sockfd)
 	return (0);
 }
 
-int	init_sock(t_ping *ping)
+int	init_sock()
 {
 	int sockfd = 0;
 
@@ -30,6 +30,6 @@ int	init_sock(t_ping *ping)
 		printf("Error Socket");
 		return (-1);
 	}
-	ping->sockfd = sockfd;
+	t_ping.sockfd = sockfd;
 	return (0);
 }
