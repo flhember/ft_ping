@@ -6,8 +6,12 @@ struct	s_ping	t_ping = {
 	.sockfd = 0,
 	.hostname = NULL,
 	.hostname_addr = NULL,
-	.seq = 0,
-	.stat_rec = 0,
+	.seq = -1,
+	.rec = 0,
+	.rtt_min = 0,
+	.rtt_max = 0,
+	.rtt_avg = 0,
+	.rtt_mul = 0,
 	.internet_addr = 
 	{
 		.sin_family = AF_INET,

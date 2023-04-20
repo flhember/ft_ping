@@ -1,5 +1,20 @@
 #include "../includes/ft_ping.h"
 
+void			set_rtt_stat(suseconds_t rtt)
+{
+	if (t_ping.seq == 0) {
+		t_ping.rtt_min = rtt;
+		t_ping.rtt_max = rtt;
+		t_ping.rtt_avg = rtt;
+		t_ping.rtt_mul = rtt * rtt;
+	} else {
+		t_ping.rtt_min = rtt < t_ping.rtt_min ? rtt : t_ping.rtt_min;
+		t_ping.rtt_max = rtt > t_ping.rtt_max ? rtt : t_ping.rtt_max;
+		t_ping.rtt_avg = t_ping.rtt_avg + rtt;
+		t_ping.rtt_mul += rtt * rtt;
+	}
+}
+
 /* Get send time of ping and subtract to current time to have total ping time*/
 suseconds_t		get_rtt_ping(struct timeval *ping_time)
 {
@@ -13,6 +28,7 @@ suseconds_t		get_rtt_ping(struct timeval *ping_time)
 	}
 	time_now = curr_time.tv_sec * 1000000 + curr_time.tv_usec;
 	rtt = time_now - ping_time->tv_sec * 1000000 - ping_time->tv_usec;
+	set_rtt_stat(rtt);
 	return (rtt);
 }
 
@@ -33,8 +49,9 @@ int		check_rec_ping(char *receive_packet, ssize_t bytes_rec)
 		return (-1);
 	} else {
 		rtt = get_rtt_ping((void *)receive_packet + sizeof(struct iphdr) + sizeof(struct icmphdr));
-		printf("%lu bytes from %s (%s): icmp_seq=%d ttl=%d time=%ld.%02ld ms\n",
-			bytes_rec - sizeof(struct iphdr), t_ping.hostname, t_ping.hostname_addr, t_ping.seq, TTL_VAL, rtt / 1000l, rtt % 1000l);
+		printf("%lu bytes from %s: icmp_seq=%d ttl=%d time=%ld.%02ld ms\n",
+			bytes_rec - sizeof(struct iphdr), /*t_ping.hostname,*/ t_ping.hostname_addr, t_ping.seq, TTL_VAL, rtt / 1000l, rtt % 1000l);
+		t_ping.rec++;
 	}
 
 	return (0);
@@ -110,7 +127,8 @@ int		send_ping( )
 /* Send and rec pck */
 int		ping_loop()
 {
-	printf("PING %s (%s) %lu(%lu) bytes of data.\n", t_ping.hostname, t_ping.hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
+	//printf("PING %s (%s) %lu(%lu) bytes of data.\n", t_ping.hostname, t_ping.hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr), sizeof(t_ping_pkt) + sizeof(struct iphdr));
+	printf("PING %s (%s): %lu data bytes\n", t_ping.hostname, t_ping.hostname_addr, sizeof(t_ping_pkt) - sizeof(struct icmphdr));
 	while (1) {
 		// send packet
 		if (send_ping() < 0) {
@@ -128,12 +146,23 @@ int		ping_loop()
 	return (0);
 }
 
+/* https://unix.stackexchange.com/questions/223672/ping-statistics */
 /* When loop stop print stat*/
 void	stop_ping()
 {
-	printf("\n--- %s ping statistics ---\n", t_ping.hostname);
-	printf("2 packets transmitted, 2 received, 0 packet loss, time 1002ms\n");
-	printf("rtt min/avg/max/mdev = 20.213/21.388/22.563/1.175 ms\n");
+	float		loss;
+	suseconds_t	avg;
+	suseconds_t	stddev;
+
+
+	t_ping.seq++;
+	loss = (((float)t_ping.seq - (float)t_ping.rec) / (float)t_ping.seq ) * 100.0;
+	printf("--- %s ping statistics ---\n", t_ping.hostname);
+	printf("%d packets transmitted, %d packets received, %d%% packet loss\n", t_ping.seq, t_ping.rec, (int)loss);
+
+	avg = t_ping.rtt_avg / t_ping.rec;
+	stddev = sqrt((t_ping.rtt_mul / t_ping.rec) - (avg * avg));
+	printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", t_ping.rtt_min / 1000.0, avg / 1000.0, t_ping.rtt_max / 1000.0, stddev / 1000.0);
 
 	exit(0);
 }

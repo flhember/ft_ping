@@ -15,12 +15,13 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <limits.h>
+# include <math.h>
 
 #define TRUE 1
 #define FALSE 0
 
 #define RECV_TIMEOUT 1
-#define TTL_VAL 115
+#define TTL_VAL 116
 #define PING_PKT_S 64
 #define	PING_SLEEP 1000000
 
@@ -32,8 +33,12 @@ extern struct			s_ping {
 	char				*hostname;
 	char				*hostname_addr;
 	unsigned int		seq;
-	unsigned int		stat_rec;
+	unsigned int		rec;
 	struct				sockaddr_in	internet_addr;
+	suseconds_t			rtt_min;
+	suseconds_t			rtt_max;
+	suseconds_t			rtt_avg;
+	suseconds_t			rtt_mul;
 }						t_ping;
 
 // Ping packet struct

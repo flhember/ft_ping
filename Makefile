@@ -1,6 +1,6 @@
 
 NAME = ft_ping
-CC = clang
+CC = gcc
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -Werror
@@ -44,7 +44,7 @@ $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@echo -e "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
 
 $(NAME): $(INC) $(OBJ_PATH) $(OBJ)
-	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME) -I $(INC_PATH)
+	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME) -lm -I $(INC_PATH)
 	@echo -e "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
 
 clean:
