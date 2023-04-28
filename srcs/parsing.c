@@ -13,7 +13,7 @@ int	find_host(char **av, int i)
 	t_ping.hostname = av[i];
 
 	if (getaddrinfo(t_ping.hostname, NULL, &hint, &addr) < 0) {
-        dprintf(2, "ping: %s: Name or service not known\n", t_ping.hostname);
+        dprintf(2, "ping: unknown host\n");
         return (-1);
     }
 
@@ -47,7 +47,6 @@ int	find_opt(char **av, int i)
 			t_ping.opt_h = TRUE;
 		}
 	} else {
-        dprintf(2, "ping: usage error: usage --------------------------------------- \n");
 		return (-1);
 	}
 	return (0);
@@ -67,5 +66,7 @@ int	parsing(int ac, char **av)
 		}
 		i++;
 	}
+	if (t_ping.opt_h)
+		return (-1);
 	return (0);
 }

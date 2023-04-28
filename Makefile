@@ -16,7 +16,7 @@ end=$ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-PING_FILES	= main parsing ping socket tool
+PING_FILES	= main parsing ping socket tool rec_ping
 INC_FILES	= ft_ping.h
 
 #---------------------------------------PATH/FILES-------------------------------#
@@ -41,19 +41,19 @@ $(OBJ_PATH):
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@$(CC) $(CFLAGS) -c -I $(INC_PATH) $< -o $@
-	@echo -e "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
+	@echo "Compilation of $(whi)$(notdir $<)$(grn_da) done.$(end)"
 
 $(NAME): $(INC) $(OBJ_PATH) $(OBJ)
 	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME) -lm -I $(INC_PATH)
-	@echo -e "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
+	@echo "$(grn_li)$(notdir $(NAME))$(grn_da) created.$(end)"
 
 clean:
 	@$(RM) -R $(OBJ_PATH)
-	@echo -e "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
+	@echo "$(red_li)Objects files of $(notdir $(NAME))$(red_da) removed.$(end)"
 
 fclean: clean
 	@$(RM) -R $(NAME)
-	@echo -e "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
+	@echo "$(red_li)$(notdir $(NAME))$(red_da) removed.$(end)"
 
 re: fclean
 	@make all -s

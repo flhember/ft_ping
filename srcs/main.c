@@ -3,15 +3,17 @@
 struct	s_ping	t_ping = {
 	.opt_h = FALSE,
 	.opt_v = FALSE,
+	.cur_pid = 0,
 	.sockfd = 0,
 	.hostname = NULL,
 	.hostname_addr = NULL,
-	.seq = -1,
+	.seq = 0,
 	.rec = 0,
 	.rtt_min = 0,
 	.rtt_max = 0,
 	.rtt_avg = 0,
 	.rtt_mul = 0,
+	.ttl_rec = 0,
 	.internet_addr = 
 	{
 		.sin_family = AF_INET,
@@ -34,15 +36,13 @@ int     main(int ac, char **av)
     }
 	// Parse info
 	if (parsing(ac, av) < 0) {
-        dprintf(2, "ping: usage error: parsing \n");
+		if (t_ping.opt_h)
+			print_help();
         return (1);
 	}
 	// if all ok start ping
 	if (init_pck() < 0)
-	{
-        dprintf(2, "ping: error init_pck \n");
 		return (1);
-	}
 
 	printf("opt v = %d\nopt h = %d\n", t_ping.opt_v, t_ping.opt_h); //debug print
     return (0);

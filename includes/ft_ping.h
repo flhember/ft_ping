@@ -21,7 +21,7 @@
 #define FALSE 0
 
 #define RECV_TIMEOUT 1
-#define TTL_VAL 116
+#define TTL_VAL 64
 #define PING_PKT_S 64
 #define	PING_SLEEP 1000000
 
@@ -29,6 +29,7 @@
 extern struct			s_ping {
 	unsigned int		opt_h;
 	unsigned int		opt_v;
+	unsigned int		cur_pid;
 	int					sockfd;
 	char				*hostname;
 	char				*hostname_addr;
@@ -39,6 +40,7 @@ extern struct			s_ping {
 	suseconds_t			rtt_max;
 	suseconds_t			rtt_avg;
 	suseconds_t			rtt_mul;
+	unsigned int		ttl_rec;
 }						t_ping;
 
 // Ping packet struct
@@ -51,7 +53,10 @@ typedef struct			s_ping_pkt {
 int			parsing(int ac, char **av);
 int			init_pck();
 int			init_sock();
+int 		rec_ping(int sockfd);
 uint16_t 	checksum(void *b, size_t len);
+void		print_help();
+char		*return_addr(char *buf);
 
 // libft:
 void    ft_bzero(void *s, size_t n);
