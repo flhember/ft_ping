@@ -57,6 +57,7 @@ int 		rec_ping(int sockfd);
 uint16_t 	checksum(void *b, size_t len);
 void		print_help();
 char		*return_addr(char *buf);
+void		print_error_rec(struct icmphdr *rec_ping_icmp, struct iphdr	*rec_ping_ip, ssize_t bytes_rec);
 
 // libft:
 void    ft_bzero(void *s, size_t n);

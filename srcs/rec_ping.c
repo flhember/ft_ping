@@ -1,27 +1,5 @@
 #include "../includes/ft_ping.h"
 
-static const char       *error_icmp[] = {
-    "",
-    "",
-    "",
-    "Destination Net Unreachable"
-};
-
-void            print_error_rec(struct icmphdr *rec_ping_icmp, struct iphdr	*rec_ping_ip, ssize_t bytes_rec)
-{
-    char buf[256];
-    struct sockaddr_in tmp_addr;
-
-    tmp_addr.sin_family = AF_INET;
-    tmp_addr.sin_addr.s_addr = rec_ping_ip->saddr;
-    getnameinfo((struct sockaddr *)&tmp_addr, sizeof(struct sockaddr_in), buf, sizeof(buf), NULL, 0, NI_NAMEREQD);
-    printf("%zu bytes from %s (", bytes_rec - sizeof(struct iphdr), buf);
-    return_addr(buf);
-    printf("): %s\n", error_icmp[rec_ping_icmp->type]);
-
-	//printf("Error Packet received with ICMP type %d\n", rec_ping_icmp->type);
-}
-
 // When packet return is error, we have to verif id in echo part
 int            check_echo_reply(struct icmphdr *rec_ping_icmp)
 {

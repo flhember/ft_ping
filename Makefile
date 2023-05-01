@@ -16,7 +16,7 @@ end=$ \033[0m
 
 #-----------------------------------------SRC/INC-------------------------------#
 
-PING_FILES	= main parsing ping socket tool rec_ping
+PING_FILES	= main parsing ping socket tool rec_ping print_error
 INC_FILES	= ft_ping.h
 
 #---------------------------------------PATH/FILES-------------------------------#
