@@ -4,5 +4,6 @@ Stat total ping.                ok
 seq first ping not good         ok
 error data ping                 ok
 -h                              ok
--v                              
-return good error
+-v                              ok
+return good error               ok
+clean and leak ? 
