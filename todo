@@ -1,9 +1,0 @@
-sleep between ping              ok
-revers dns / getnameaddr        ok
-Stat total ping.                ok
-seq first ping not good         ok
-error data ping                 ok
--h                              ok
--v                              ok
-return good error               ok
-clean and leak ? 

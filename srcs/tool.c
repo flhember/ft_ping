@@ -72,22 +72,15 @@ void	print_help()
 
 char            *return_addr(char *buf)
 {
-    char				*tmp_addr;
+    char				tmp_addr[INET_ADDRSTRLEN];
 	struct addrinfo		*addr = NULL;
 	struct addrinfo		hint = {.ai_family = AF_INET, .ai_socktype = SOCK_RAW, .ai_protocol = IPPROTO_ICMP};
 
 	if (getaddrinfo(buf, NULL, &hint, &addr) < 0) {
         return (NULL);
     }
-
-	if (!(tmp_addr = malloc(INET_ADDRSTRLEN))) {
-		dprintf(2, "ping: Error malloc in return_addr\n");
-        return (NULL);
-	}
-
 	inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, tmp_addr, INET_ADDRSTRLEN);
     printf("%s", tmp_addr);
 	freeaddrinfo(addr);
-    free(tmp_addr);
 	return (0);
 }

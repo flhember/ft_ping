@@ -6,7 +6,6 @@ struct	s_ping	t_ping = {
 	.cur_pid = 0,
 	.sockfd = 0,
 	.hostname = NULL,
-	.hostname_addr = NULL,
 	.seq = 0,
 	.rec = 0,
 	.rtt_min = 0,
@@ -44,6 +43,5 @@ int     main(int ac, char **av)
 	if (init_pck() < 0)
 		return (1);
 
-	printf("opt v = %d\nopt h = %d\n", t_ping.opt_v, t_ping.opt_h); //debug print
     return (0);
 }

@@ -32,7 +32,7 @@ extern struct			s_ping {
 	unsigned int		cur_pid;
 	int					sockfd;
 	char				*hostname;
-	char				*hostname_addr;
+	char				hostname_addr[INET_ADDRSTRLEN];
 	unsigned int		seq;
 	unsigned int		rec;
 	struct				sockaddr_in	internet_addr;

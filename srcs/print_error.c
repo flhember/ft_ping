@@ -42,7 +42,7 @@ void            verbose_print(struct icmphdr *icmp)
     }
     printf("\nVr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data\n");
     printf(" %01x  %01x  %02x %04x %04x   %1x %04x  %02x  %02x %04x", 
-        ip->ip_v, ip->ip_hl, ip->ip_tos, ip->ip_len, ntohs(ip->ip_id), (ntohs(ip->ip_off) & 0xe000) >> 13, ntohs(ip->ip_off), ip->ip_ttl, ip->ip_p, ntohs(ip->ip_sum));
+        ip->ip_v, ip->ip_hl, ip->ip_tos, ntohs(ip->ip_len), ntohs(ip->ip_id), (ntohs(ip->ip_off) & 0xe000) >> 13, ntohs(ip->ip_off), ip->ip_ttl, ip->ip_p, ntohs(ip->ip_sum));
     
     printf(" %s ", inet_ntoa(*((struct in_addr *)&ip->ip_src)));
     printf(" %s ", inet_ntoa(*((struct in_addr *)&ip->ip_dst)));
@@ -80,11 +80,7 @@ void            print_error_rec(struct icmphdr *rec_ping_icmp, struct iphdr	*rec
     printf("%zu bytes from %s (", bytes_rec - sizeof(struct iphdr), buf);
     return_addr(buf);
     printf("): ");
-
     print_icmp_error(rec_ping_icmp->type, rec_ping_icmp->code);
-
-	//printf("Error Packet received with ICMP type %d code %d\n", rec_ping_icmp->type, rec_ping_icmp->code);             // for debug
-
     if (t_ping.opt_v)
         verbose_print(rec_ping_icmp);
 }

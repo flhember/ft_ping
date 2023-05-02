@@ -2,7 +2,6 @@
 
 int	find_host(char **av, int i)
 {
-	char				*tmp_addr;
 	struct addrinfo		*addr = NULL;
 	struct addrinfo		hint = {.ai_family = AF_INET, .ai_socktype = SOCK_RAW, .ai_protocol = IPPROTO_ICMP};
 
@@ -11,21 +10,13 @@ int	find_host(char **av, int i)
 		return (-1);
 	}
 	t_ping.hostname = av[i];
-
 	if (getaddrinfo(t_ping.hostname, NULL, &hint, &addr) < 0) {
         dprintf(2, "ping: unknown host\n");
         return (-1);
     }
-
-	if (!(tmp_addr = malloc(INET_ADDRSTRLEN))) {
-		dprintf(2, "ping: Error malloc\n");
-        return (-1);
-	}
     t_ping.internet_addr = *(struct sockaddr_in*)addr->ai_addr;
-	inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, tmp_addr, INET_ADDRSTRLEN);
-	t_ping.hostname_addr = tmp_addr;
+	inet_ntop(addr->ai_family, &((struct sockaddr_in *)addr->ai_addr)->sin_addr, t_ping.hostname_addr, INET_ADDRSTRLEN);
 	freeaddrinfo(addr);
-
 	return (0);
 }
 
